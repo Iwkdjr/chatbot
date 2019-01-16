@@ -1,0 +1,163 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>AI charger</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="Shortcut Icon" type="image/x-icon" href="pic.ico" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script type="text/javascript">
+	var ans = {};
+	var total = 0;
+	var questid = 0;
+	var questions = [
+		["您好，請輸入您的性別 (1) 男 (2) 女", ["1","2"]],
+		["請輸入年齡", []],
+		["平常拿手的事情，卻花費更多時間去完成，還不一定做得很好。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是", ["1","2","3","4"]],
+		["覺得心情煩躁，無法集中精神做該做的事。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是",["1","2","3","4"]],
+		["別人交代的事，轉頭就忘，或是，忘記要告訴某人甚麼事情。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是",["1","2","3","4"]],
+		["找不到需要用的東西(手機、鑰匙、錢包...等等)。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是",["1","2","3","4"]],
+		["與他人溝通，無法清楚表達意思，也無法理解他人的意思。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是",["1","2","3","4"]],
+		["生活上，需要思考時，想不出好點子，思緒混沌，要做決定十分困難。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是",["1","2","3","4"]],
+		["覺得身體疲勞，怎麼睡都睡不飽。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是",["1","2","3","4"]],
+		["日常生活提不起勁，興致缺缺，很難打起精神。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是",["1","2","3","4"]],
+		["覺得身體不舒服，包含任何一項：頭痛、頭暈、視力模糊、耳鳴或頭重腳輕。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是",["1","2","3","4"]],
+		["因上述問題，已造成在日常生活中，或與他人相處時的困擾。 (1)幾乎沒有 (2)有時候有 (3)經常 (4)總是",["1","2","3","4"]],
+	];
+	
+	function OK(){
+		var answer = $("#xxx").val();
+		$("#xxx").val("");
+		
+		var corrent = false;
+		if(questions[questid][1].length > 0){
+			for(var v in questions[questid][1]){
+				if(answer == questions[questid][1][v]) corrent = true;
+			}
+		}else corrent = true;
+		
+		if(corrent){
+			ans[questid] = answer;
+			NewAnswer(answer);
+			questid++;
+			if(questid >= questions.length){				
+				Send();
+			}else{
+				NewQuestion(questions[questid][0]);
+			}
+		}else{
+			NewQuestion("請輸入合法的答案");
+		}
+		$(".chatlogs").scrollTop(9999);
+	}
+	
+	function Send(){
+		var total = 0;
+		for (var i = 2; i < questions.length; i++){
+			total += parseInt(ans[i]);
+		}	
+		ans[questid] = total;
+		var str;
+		if(total >= 10 && total < 16){
+			str="健康腦";			
+			alert(str+"\n分數："+total);
+		}
+		else if (total >= 16 && total < 25) {
+			str="微腦霧";			
+			alert(str+"\n分數："+total);
+		}
+		else if (total >= 25 && total < 33) {
+			str="輕微腦霧";			
+			alert(str+"\n分數："+total);
+		}
+		else if (total >= 33 && total <= 40) {
+			str="重度腦霧";			
+			alert(str+"\n分數："+total);
+		}
+		// var x = document.getElementById("pic");
+   			 // if (x.style.display === "none") {
+    		    // x.style.display = "block";
+   			 // } else {
+    		    // x.style.display = "none";
+    		// }
+		var postdata = ans;
+		$.ajax({
+		url: "bot.php",
+		 type: "POST",
+			data:postdata,
+			error:function(){
+					alert("失敗");
+			},
+			success:function(){
+                    
+			} 
+		});
+	}
+	
+	function NewQuestion(question){
+		var dialog = $(".chat.friend").first().clone();
+		dialog.children(".chat-message").text(question);
+		dialog.css("visibility","visible");
+		$(".chatlogs").append(dialog);
+	}
+	
+	function NewAnswer(answer){
+		var dialog = $(".chat.self").first().clone();
+		dialog.children(".chat-message").text(answer);
+		dialog.css("visibility","visible");
+		$(".chatlogs").append(dialog);
+	}
+
+	$(function() {
+		NewQuestion(questions[questid][0]);
+	});
+	function changeImage() {
+        var image = document.getElementById('pic');
+        image.src = "pic.php?" + new Date().getTime();
+    }
+    
+    
+    function countdown() {
+    // your code goes here
+    var count = 10;
+    var timerId = setInterval(function() {
+        count--;
+       // console.log(count);
+       document.getElementById("cdown").innerHTML = count.toString();
+ 
+        if(count == 0) {
+            changeImage();
+            count = 10;
+        }
+    }, 1000);
+}
+countdown();
+	</script>
+</head>
+ <body>
+ 	<form method="POST" action="" enctype="multipart/form-data" onsubmit="return false;"> 
+  	<p> 圖片將於 <span id="cdown" style="color:blue; font-size:20px"></span> 秒自動更新</p>
+	<img src="pic.php?" align="left" id="pic" >
+	<div class="chatbot">
+		<div class="chatlogs">
+
+		</div>	
+		<div class="chat-form">
+			<input id="xxx" type="text" name="abc" maxlength="8">
+			<button onclick="OK()">送出</button>
+		</div> 
+	</div>
+	</form>	
+
+	</body>
+</html>
+
+<div class="chat friend" style="visibility:hidden">
+	<div class="user"><img src="img\imgone.jpg"></div>
+		<p class="chat-message">您好，請輸入您的性別</p>
+</div>
+
+<div class="chat self" style="visibility:hidden">
+	<div class="user"><img src="img\img2.jpg"></div>
+		<p class="chat-message">您好，請輸入您的性別</p>
+</div>
